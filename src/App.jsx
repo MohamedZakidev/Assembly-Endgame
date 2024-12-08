@@ -1,18 +1,22 @@
 import clsx from "clsx"
 import { useState } from "react"
 import { languages } from "./languages"
+import { getFarewellText } from "./utils"
 
 export default function AssemblyEndgame() {
   // eslint-disable-next-line no-unused-vars
   const [currentWord, setCurrentWord] = useState("react")
   const [guessedLetters, setGuessedLetters] = useState([])
+  const [numGuessesLeft, setNumGuessesLeft] = useState(currentWord.length)
 
   const alphabet = "abcdefghijklmnopqrstuvwxyz"
 
   const WrongGuessCount = guessedLetters.filter(letter => !currentWord.includes(letter)).length
 
   const hasWon = currentWord.split("").every(letter => guessedLetters.includes(letter))
-  const hasLost = WrongGuessCount >= languages.length
+  const hasLost = WrongGuessCount >= languages.length - 1
+  const [hasGuessedWrong, setHasGuessedWrong] = useState(false)
+  const lastGuessedLetter = guessedLetters[guessedLetters.length - 1]
 
   const isGameOver = hasLost || hasWon
 
@@ -23,8 +27,9 @@ export default function AssemblyEndgame() {
 
   function handleGuessLetter(letter) {
     setGuessedLetters(prev => [...prev, letter])
+    setHasGuessedWrong(!currentWord.includes(letter))
+    setNumGuessesLeft(prev => prev - 1)
   }
-
 
   const languageElements = languages.map((lang, index) => {
     const lost = index < WrongGuessCount
@@ -60,13 +65,15 @@ export default function AssemblyEndgame() {
     const isGuessed = guessedLetters.includes(letter)
     const isCorrect = isGuessed && currentWord.includes(letter)
     const style = {
-      backgroundColor: isCorrect ? "green" : isGuessed && "red"
+      backgroundColor: isCorrect ? "#10A95B" : isGuessed && "#EC5D49"
     }
     return (
       <button
         key={letter}
         onClick={() => handleGuessLetter(letter)}
-        disabled={isGuessed}
+        disabled={isGameOver || isGuessed}
+        aria-disabled={isGameOver || isGuessed}
+        aria-label={`letter ${letter}`}
         style={style}
       >
         {letter.toUpperCase()}
@@ -77,7 +84,8 @@ export default function AssemblyEndgame() {
 
   const gameStatusClass = clsx("game-status", {
     won: hasWon,
-    lost: hasLost
+    lost: hasLost,
+    farewell: !hasLost && hasGuessedWrong
   })
 
   return (
@@ -87,7 +95,7 @@ export default function AssemblyEndgame() {
         <p>Guess the word within 8 attempts to keep the
           programming world safe from Assembly!</p>
       </header>
-      <section className={gameStatusClass}>
+      <section aria-live="polite" role="status" className={gameStatusClass}>
         {hasWon && (
           <>
             <h2>You win!</h2>
@@ -100,7 +108,13 @@ export default function AssemblyEndgame() {
             <p>You lose! Better start learning Assembly 😭</p>
           </>
         )}
-
+        {!hasLost && hasGuessedWrong && (
+          <>
+            <p className="farewell-message">
+              {getFarewellText(languages[WrongGuessCount - 1].name)}
+            </p>
+          </>
+        )}
       </section>
       <section className="language-chips">
         {languageElements}
@@ -108,6 +122,26 @@ export default function AssemblyEndgame() {
       <section className="word">
         {letterElements}
       </section>
+
+      <section aria-live="polite" role="status" className="sr-only">
+
+        <p>
+          {!hasGuessedWrong ?
+            `Correct! The letter ${lastGuessedLetter} is in the word.` :
+            `Sorry, the letter ${lastGuessedLetter} is not in the word.`
+          }
+          You have {numGuessesLeft} attempts left.
+        </p>
+
+        <p>
+          {
+            currentWord.split("").map(letter =>
+              guessedLetters.includes(letter) ? letter + "." : "blank.")
+              .join(" ")
+          }
+        </p>
+      </section>
+
       <section className="keyboard">
         {keyboardElements}
       </section>
