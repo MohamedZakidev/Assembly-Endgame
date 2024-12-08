@@ -102,7 +102,10 @@ export default function AssemblyEndgame() {
 
   return (
     <main>
-      {hasWon && <ReactConfetti />}
+      {
+        hasWon &&
+        <ReactConfetti recycle={false} numberOfPieces={1000} />
+      }
       <header>
         <h1>Assembly: Endgame</h1>
         <p>Guess the word within 8 attempts to keep the
