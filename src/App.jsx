@@ -1,16 +1,15 @@
 import clsx from "clsx"
 import { useEffect, useState } from "react"
+import ReactConfetti from "react-confetti"
 import { languages } from "./languages"
 import { getFarewellText, getRandomWord } from "./utils"
-
 export default function AssemblyEndgame() {
-
 
   const [currentWord, setCurrentWord] = useState(() => getRandomWord()) // lazy state initialization
   const [guessedLetters, setGuessedLetters] = useState([])
   const [hasGuessedWrong, setHasGuessedWrong] = useState(false)
   const [numGuessesLeft, setNumGuessesLeft] = useState(languages.length - 1)
-
+  console.log(currentWord)
 
   const alphabet = "abcdefghijklmnopqrstuvwxyz"
 
@@ -103,6 +102,7 @@ export default function AssemblyEndgame() {
 
   return (
     <main>
+      {hasWon && <ReactConfetti />}
       <header>
         <h1>Assembly: Endgame</h1>
         <p>Guess the word within 8 attempts to keep the
