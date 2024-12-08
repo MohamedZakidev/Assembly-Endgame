@@ -1,34 +1,42 @@
 import clsx from "clsx"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { languages } from "./languages"
-import { getFarewellText } from "./utils"
+import { getFarewellText, getRandomWord } from "./utils"
 
 export default function AssemblyEndgame() {
-  // eslint-disable-next-line no-unused-vars
-  const [currentWord, setCurrentWord] = useState("react")
+
+
+  const [currentWord, setCurrentWord] = useState(() => getRandomWord()) // lazy state initialization
   const [guessedLetters, setGuessedLetters] = useState([])
-  const [numGuessesLeft, setNumGuessesLeft] = useState(currentWord.length)
+  const [hasGuessedWrong, setHasGuessedWrong] = useState(false)
+  const [numGuessesLeft, setNumGuessesLeft] = useState(languages.length - 1)
+
 
   const alphabet = "abcdefghijklmnopqrstuvwxyz"
 
   const WrongGuessCount = guessedLetters.filter(letter => !currentWord.includes(letter)).length
-
   const hasWon = currentWord.split("").every(letter => guessedLetters.includes(letter))
   const hasLost = WrongGuessCount >= languages.length - 1
-  const [hasGuessedWrong, setHasGuessedWrong] = useState(false)
   const lastGuessedLetter = guessedLetters[guessedLetters.length - 1]
 
   const isGameOver = hasLost || hasWon
 
-  // function getRandomWord() {
-  //   const randomNumber = Math.floor(Math.random() * words.length)
-  //   return words[randomNumber]
-  // }
+  useEffect(() => {
+    if (hasGuessedWrong) {
+      setNumGuessesLeft(prev => prev - 1)
+    }
+  }, [hasGuessedWrong, guessedLetters])
 
   function handleGuessLetter(letter) {
     setGuessedLetters(prev => [...prev, letter])
     setHasGuessedWrong(!currentWord.includes(letter))
-    setNumGuessesLeft(prev => prev - 1)
+  }
+
+  function startNewGame() {
+    setCurrentWord(() => getRandomWord())
+    setGuessedLetters([])
+    setHasGuessedWrong(false)
+    setNumGuessesLeft(languages.length - 1)
   }
 
   const languageElements = languages.map((lang, index) => {
@@ -50,10 +58,15 @@ export default function AssemblyEndgame() {
 
   const letterElements = currentWord.split("").map((letter, index) => {
     const show = guessedLetters.includes(letter)
+    const revealMissedLetters = hasLost && !guessedLetters.includes(letter)
+    const styles = {
+      color: revealMissedLetters && "#EC5D49"
+    }
+
     return (
       <span key={index}>
-        {show && (
-          <span>
+        {(hasLost || show) && (
+          <span style={styles}>
             {letter.toUpperCase()}
           </span>
         )}
@@ -147,7 +160,12 @@ export default function AssemblyEndgame() {
       </section>
       {
         isGameOver &&
-        <button className="new-game">New Game</button>
+        <button
+          className="new-game"
+          onClick={startNewGame}
+        >
+          New Game
+        </button>
       }
     </main>
   )
