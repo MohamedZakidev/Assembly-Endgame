@@ -9,7 +9,6 @@ export default function AssemblyEndgame() {
   const [guessedLetters, setGuessedLetters] = useState([])
   const [hasGuessedWrong, setHasGuessedWrong] = useState(false)
   const [numGuessesLeft, setNumGuessesLeft] = useState(languages.length - 1)
-  console.log(currentWord)
 
   const alphabet = "abcdefghijklmnopqrstuvwxyz"
 
