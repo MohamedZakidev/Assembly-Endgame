@@ -3,8 +3,8 @@ import { useEffect, useState } from "react"
 import ReactConfetti from "react-confetti"
 import { languages } from "./languages"
 import { getFarewellText, getRandomWord } from "./utils"
-export default function AssemblyEndgame() {
 
+export default function AssemblyEndgame() {
   const [currentWord, setCurrentWord] = useState(() => getRandomWord()) // lazy state initialization
   const [guessedLetters, setGuessedLetters] = useState([])
   const [hasGuessedWrong, setHasGuessedWrong] = useState(false)
